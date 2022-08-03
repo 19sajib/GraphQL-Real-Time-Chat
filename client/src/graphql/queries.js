@@ -10,3 +10,14 @@ query getAllUsers {
     }
   }  
 `
+export const GET_MSG = gql`
+query MessagesByUser($receiverId: String!) {
+  messagesByUser(receiverId: $receiverId) {
+    id
+    text
+    receiverId
+    senderId
+    createdAt
+  }
+}
+`
