@@ -2,10 +2,11 @@ import React,{useState,useEffect} from 'react'
 import { useParams } from 'react-router-dom';
 import {AppBar,Toolbar,Avatar, Typography,Box, TextField, Stack} from '@mui/material'
 import MessageCard from './MessageCard';
-import { useQuery, useMutation } from '@apollo/client';
+import { useQuery, useMutation, useSubscription } from '@apollo/client';
 import { GET_MSG } from '../graphql/queries';
 import SendIcon from '@mui/icons-material/Send';
 import { SEND_MSG } from '../graphql/mutations';
+import { MSG_SUB } from '../graphql/subscriptions'
 import jwt_decode from 'jwt-decode'
 
 const ChatScreen = () => {
@@ -25,8 +26,19 @@ const ChatScreen = () => {
 
   const [sendMessage] = useMutation(SEND_MSG,{
     onCompleted(data){
-      setMessages((prevMessages)=>[...prevMessages,data.createMessage])
+      // setMessages((prevMessages)=>[...prevMessages,data.createMessage])
       setText('')
+    }
+  })
+
+  const {data:subData} = useSubscription(MSG_SUB,{
+    onSubscriptionData({subscriptionData:{data}}){
+       if(
+         (data.messageAdded.receiverId === id && data.messageAdded.senderId === userId) ||
+         (data.messageAdded.receiverId === userId && data.messageAdded.senderId === id) 
+       ){
+          setMessages((prevMessages)=>[...prevMessages,data.messageAdded])  
+       }
     }
   })
 
